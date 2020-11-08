@@ -14,7 +14,7 @@ def main():
     orb = cv2.ORB_create()
 
     BASE_DIR = 'files'
-    TEST_IMAGE_NAME = 'test_20_2.jpg'
+    TEST_IMAGE_NAME = 'test_50_2.jpg'
     TEST_IMAGE_LOC = os.path.join(BASE_DIR, TEST_IMAGE_NAME)
 
     test_img = read_img(TEST_IMAGE_LOC)
@@ -34,7 +34,7 @@ def main():
     	(kp2, des2) = orb.detectAndCompute(train_img, None)
 
     	# brute force matcher
-    	bf = cv2.BFMatcher()
+    	bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
 
         # Match descriptors
     	all_matches = bf.knnMatch(des1, des2, k=2)

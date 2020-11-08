@@ -11,12 +11,12 @@ import cv2
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from pprint import pprint
+# from pprint import pprint
 
 
 # read image as is
 def read_img(file_name):
-	img = cv2.imread(file_name)
+	img = cv2.imread(file_name)#, cv2.IMREAD_GRAYSCALE)
 	return img
 
 
@@ -87,10 +87,10 @@ def sobel_edge2(image):
 def canny_edge(image, block_size, ksize):
 	# block_size => Neighborhood size
 	# ksize => Aperture parameter for the Sobel operator
-	
+
 	# 350, 350 => for smaller 500
 	# 720, 350 => Devnagari 500, Reserve bank of India
-	
+
 	img = cv2.Canny(image, block_size, ksize)
 	# dilate to fill up the numbers
 	#img = cv2.dilate(img, None)
@@ -146,7 +146,7 @@ def harris_edge(image):
 # calculate histogram
 def histogram(image):
 	hist = cv2.calcHist([image], [0], None, [256], [0, 256])
-	# cv2.calcHist(images, channels, mask, histSize, ranges[, hist[, accumulate]]) 
+	# cv2.calcHist(images, channels, mask, histSize, ranges[, hist[, accumulate]])
 	plt.plot(hist)
 	plt.show()
 
@@ -169,7 +169,7 @@ def fourier(image):
 # calculate scale and fit into display
 def display(window_name, image):
 	screen_res = 1440, 900	# MacBook Air
-	
+
 	scale_width = screen_res[0] / image.shape[1]
 	scale_height = screen_res[1] / image.shape[0]
 	scale = min(scale_width, scale_height)

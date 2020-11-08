@@ -1,5 +1,4 @@
-#!/usr/bin/python
-# @Date: 	2017-03-22
+#!/usr/bin/env python
 
 # test file
 # TODO:
@@ -97,7 +96,7 @@ find largest contours
 (_,cnts, _) = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
 #print "cnts: ", cnts
-screenCnt = 0 
+screenCnt = 0
 
 n = .02
 flag = True
@@ -108,7 +107,7 @@ while(n<.9 and flag==True):		#remove while loop if wrong contour is being detect
 				peri = cv2.arcLength(c, True)
 				approx = cv2.approxPolyDP(c,n*peri, True)
 				print("Approx: ", len(approx))
-		
+
 				# if our approximated contour has four points, then we
 				# can assume that we have found our screen
 				if len(approx) == 4:
@@ -202,7 +201,7 @@ if max_val != 8:
 
 	train_img = cv2.imread(training_set[max_pt])
 	img3 = cv2.drawMatchesKnn(test_img, kp1, train_img, max_kp, good, 4)
-	
+
 	note = str(training_set[max_pt])[6:-4]
 	print('\nDetected denomination: Rs. ', note)
 
@@ -211,7 +210,7 @@ if max_val != 8:
 	# audio_file = "value.mp3
 	# tts = gTTS(text=speech_out, lang="en")
 	# tts.save(audio_file)
-	
+
 
 	(plt.imshow(img3), plt.show())
 else:

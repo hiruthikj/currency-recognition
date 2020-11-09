@@ -1,80 +1,91 @@
+#!usr/bin/env python
 from utils import *
 from matplotlib import pyplot as plt
-import os
 import cv2
+
+import glob
+import os
+from pathlib import Path
+
+MIN_MATCH_COUNT = 10
 
 def main():
     print('Currency Recognition Program starting...')
 
-    max_val = 8
-    max_pt = -1
-    max_kp = 0
+    max_matches = 0
+    best_i = -1
+    best_kp = 0
 
     # Initiate ORB detector
     orb = cv2.ORB_create()
 
-    BASE_DIR = 'files'
-    TEST_IMAGE_NAME = 'test_50_2.jpg'
-    TEST_IMAGE_LOC = os.path.join(BASE_DIR, TEST_IMAGE_NAME)
+    test_dir = 'testing_images'
+    currency_dir = 'currency_images'
+    test_image_name = 'test_50_2.jpg'
 
-    test_img = read_img(TEST_IMAGE_LOC)
+    test_image_loc = os.path.join(test_dir, test_image_name)
+    test_img = read_img(test_image_loc)
 
-    # resizing must be dynamic
-    original = resize_img(test_img, 0.4)
-    display('original', original)
+    # resizing to display
+    image_to_view = resize_img(test_img, 0.4)
+    display('INPUT', image_to_view)
 
     # keypoints and descriptors
-    kp1, des1 = orb.detectAndCompute(test_img, None)
+    kp1, des1 = orb.detectAndCompute(test_img, mask = None)
 
-    training_set = ['files/20.jpg', 'files/50.jpg', 'files/100.jpg', 'files/500.jpg']
+    training_set = [
+        img for img in glob.glob(os.path.join(currency_dir, "*.jpg"))
+    ]
+    training_set_name = [
+        Path(img_path).stem for img_path in training_set
+    ]
 
-    for i in range(0, len(training_set)):
-    	train_img = cv2.imread(training_set[i])
+    for i in range(len(training_set)):
+        train_img = cv2.imread(training_set[i])
+        kp2, des2 = orb.detectAndCompute(train_img, mask = None)
 
-    	(kp2, des2) = orb.detectAndCompute(train_img, None)
-
-    	# brute force matcher
-    	bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+        # brute force matcher
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
 
         # Match descriptors
-    	all_matches = bf.knnMatch(des1, des2, k=2)
+        all_matches = bf.knnMatch(des1, des2, k=2)
 
-    	good = []
-    	# give an arbitrary number -> 0.789
-    	# if good -> append to list of good matches
+        good = []
 
-    	for (m, n) in all_matches:
-    		if m.distance < 0.789 * n.distance:
-    			good.append([m])
+        # store all the good matches as per Lowe's ratio test.
+        for m, n in all_matches:
+            if m.distance < 0.75 * n.distance:
+                good.append([m])
 
-    	if len(good) > max_val:
-    		max_val = len(good)
-    		max_pt = i
-    		max_kp = kp2
+        num_matches = len(good)
+        if num_matches > max_matches:
+            max_matches = num_matches
+            best_i = i
+            best_kp = kp2
 
-    	print(i, ' ', training_set[i], ' ', len(good))
+        print(i, ' ', training_set[i], ' ', len(good))
 
-    if max_val >= 8:
-    	print(training_set[max_pt])
-    	print('good matches ', max_val)
+    if max_matches >= MIN_MATCH_COUNT:
+        print(f'Good Match Found!\n{training_set_name[best_i]} has maximum matches of {max_matches}')
 
-    	train_img = cv2.imread(training_set[max_pt])
-    	img3 = cv2.drawMatchesKnn(test_img, kp1, train_img, max_kp, good, 4)
+        train_img = cv2.imread(training_set[best_i])
+        match_img = cv2.drawMatchesKnn(test_img, kp1, train_img, best_kp, good, None)#, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
-    	note = str(training_set[max_pt])[6:-4]
-    	print('\nDetected denomination: Rs. ', note)
+        note = str(training_set_name[best_i])
+        print(f'\nDetected denomination: {note}')
 
-    	(plt.imshow(img3), plt.show())
+        plt.imshow(match_img), plt.title('DETECTED MATCH'), plt.show()
 
     else:
-    	print('No Matches')
-    	train_img = cv2.imread(training_set[max_pt])
-    	img3 = cv2.drawMatchesKnn(test_img, kp1, train_img, max_kp, good, 4)
+        print('No Good Matches, closest one has {max_matches} matches')
+        train_img = cv2.imread(training_set[best_i])
+        closest_match = cv2.drawMatchesKnn(test_img, kp1, train_img, best_kp, good, 4)
 
-    	note = str(training_set[max_pt])[6:-4]
-    	print('\nDetected denomination: Rs. ', note)
+        note = str(training_set_name[best_i])
+        print(f'\nPredicted denomination: {note}')
 
-    	(plt.imshow(img3), plt.show())
+
+        plt.imshow(closest_match), plt.title('CLOSEST MATCH'), plt.show()
 
     print('Program exited')
 

@@ -1,10 +1,4 @@
 #!usr/bin/env python
-# @Date:	2017-03-22
-
-# UE14CS348 Digital Image Processing Mini Project
-# Indian paper currency detection
-
-# utils.py
 # contains utility functions
 
 import cv2

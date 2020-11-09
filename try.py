@@ -1,14 +1,4 @@
-#!/usr/bin/env python
-
-# test file
-# TODO:
-# 	Figure out four point transform
-#	Figure out testing data warping
-# 	Use webcam as input
-# 	Figure out how to use contours
-# 		Currently detects inner rect -> detect outermost rectangle
-# 	Try using video stream from android phone
-
+#!usr/bin/env python
 
 from utils import *
 from matplotlib import pyplot as plt

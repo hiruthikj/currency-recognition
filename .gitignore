@@ -1,9 +1,8 @@
 __pycache__
 .env/
 .ipynb_checkpoints/
-alias
-reference
-key-notes
+audio/
+
 try_*
 Ca*
 *.ipynb

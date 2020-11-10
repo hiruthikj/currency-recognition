@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 # read image as is
 def read_img(file_name):
-	img = cv2.imread(file_name, cv2.IMREAD_GRAYSCALE)
+	img = cv2.imread(file_name)#, cv2.IMREAD_GRAYSCALE)
 	return img
 
 

@@ -6,3 +6,5 @@ reference
 key-notes
 try_*
 Ca*
+*.ipynb
+utils_org.py

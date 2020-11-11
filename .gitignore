@@ -1,9 +1,12 @@
+# folders
 __pycache__
 .env/
 .ipynb_checkpoints/
 audio/
 
-try_*
+
+# files
+try*
 Ca*
 *.ipynb
 utils_org.py

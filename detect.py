@@ -8,16 +8,18 @@ import glob
 import os
 from pathlib import Path
 
-MIN_MATCH_COUNT = 20
-KERNEL_SIZE = 13
+MIN_MATCH_COUNT = 5
+KERNEL_SIZE = 7
 
 test_dir = 'testing_images'
 currency_dir = 'currency_images'
-test_image_name = 'test_50_2.jpg'
+test_image_name = 'test_20_2.jpg'
+# test_image_name = 'test_100_1.jpg'
 # test_image_name = 'Cat03.jpg'
 
 def main():
     print('Currency Recognition Program starting...\n')
+    print('ACTUAL denomination', test_image_name)
 
     training_set = [
         img for img in glob.glob(os.path.join(currency_dir, "*.jpg"))
@@ -69,8 +71,10 @@ def main():
 
         print(f'{i+1} \t {training_set[i]} \t {len(good)}')
 
-    if max_matches >= MIN_MATCH_COUNT:
-        print(f'\nMatch Found!\n{training_set_name[best_i]} has maximum matches of {max_matches} ({len(best_kp)/sum_kp*100}%)')
+    kp_perc = len(best_kp)/sum_kp*100
+    # if max_matches >= MIN_MATCH_COUNT:
+    if kp_perc > 10:
+        print(f'\nMatch Found!\n{training_set_name[best_i]} has maximum matches of {max_matches} ({kp_perc}%)')
 
         match_img = cv2.drawMatchesKnn(test_img, kp1, best_img, best_kp, good, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
@@ -80,7 +84,7 @@ def main():
         plt.imshow(match_img), plt.title(f'DETECTED MATCH: {note}'), plt.show()
 
     else:
-        print(f'\nNo Good Matches, closest one has {max_matches} matches')
+        print(f'\nNo Good Matches, closest one has {max_matches} matches ({kp_perc}%)')
 
         closest_match = cv2.drawMatchesKnn(test_img, kp1, best_img, best_kp, good, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
@@ -96,26 +100,60 @@ def main():
 
 
 
+
 def preprocess(img, showImages = True):
-    #showing the image inputed
+    #showing the image input    # img = cv2.equalizeHist(img.astype(np.uint8))
+    # showImages and display('After Histogram Equalization', img)ed
     img = resize_img(img, 0.4)
-    if showImages:
-        display('INPUT AFTER RESIZE', img)
+    showImages and display('INPUT AFTER RESIZE', img)
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    if showImages:
-        display('After Ctest_50_2onverting to Grayscale', img)
+    showImages and display('After Converting to Grayscale', img)
 
-    img = cv2.equalizeHist(img.astype(np.uint8))
-    if showImages:
-        display('After Histogram Equalization', img)
+    # img = cv2.equalizeHist(img.astype(np.uint8))
+    # showImages and display('After Histogram Equalization', img)
 
-    # test_img = cv2.GaussianBlur(test_img, (KERNEL_SIZE,KERNEL_SIZE), sigmaX=0)
+    # test_img = cv2.GaussianBlur(img, (KERNEL_SIZE,KERNEL_SIZE), sigmaX=0)
     img = cv2.bilateralFilter(img, KERNEL_SIZE, KERNEL_SIZE*2, KERNEL_SIZE//2)
-    if showImages:
-        display('After Bilateral Blur', img)
+    showImages and display('After Bilateral Blur', img)
+
+    ret2,img = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    showImages and display('OTSU threshol', img)
+
+    # img = getAutoEdge(img)
+    # showImages and display('After Canny Edge Detection', img)
+    #
+    # contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    #
+    # max_area = 0
+    # max_i = -1
+    #
+    # for i in range(len(contours)):
+    #     if cv2.contourArea(contours[i]) > max_area:
+    #         max_area = cv2.contourArea(contours[i])
+    #         max_i = i
+    #
+    # print(max_i, max_area)
+    #
+    # showImages and display('Contours', img)
+    #
+    # cont = cv2.drawContours(img, contours, max_i, (0, 255, 0), 10)
+    # showImages and display('Contours 222', cont)
+
+
+    # kernel = np.ones((5,5),np.uint8)
+    # erosion = cv2.erode(img,kernel,iterations = 1)
+    # showImages and display('erosion', img)
 
     return img
+
+
+def getAutoEdge(img, sigma=0.33):
+    v = np.median(img)
+    lower_thresh = int(max(0, (1.0 - sigma) * v))
+    upper_thresh = int(min(255, (1.0 + sigma) * v))
+    img_edges = cv2.Canny(img, lower_thresh, upper_thresh)
+    return img_edges
 
 
 if __name__ == '__main__':

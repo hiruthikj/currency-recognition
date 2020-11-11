@@ -8,14 +8,14 @@ import glob
 import os
 from pathlib import Path
 
-MIN_MATCH_COUNT = 10
-KERNEL_SIZE = 9
+MIN_MATCH_COUNT = 7
+KERNEL_SIZE = 11
 
 test_dir = 'testing_images'
 currency_dir = 'currency_images'
-# test_image_name = 'test_dollar_100.jpg'
+# test_image_name = 'test_100_1.jpg'
 test_image_name = 'Euro-500.png'
-# test_image_name = 'test_500_1.jpg'
+# test_image_name = 'test_100_1.jpg'
 # test_image_name = 'Cat03.jpg'
 
 def main():
@@ -42,7 +42,8 @@ def main():
     kp1, des1 = orb.detectAndCompute(test_img, mask=None)
 
     max_matches = -1
-    sum_kp = 0
+    sum_good_matches = 0
+    kp_perc = 0
 
     for i in range(len(training_set)):
         train_img = cv2.imread(training_set[i])#,cv2.IMREAD_GRAYSCALE)
@@ -61,19 +62,24 @@ def main():
             if m.distance < 0.6 * n.distance:
                 good.append([m])
 
-        sum_kp += len(kp2)
+        # print(sum_good_matches)
 
         num_matches = len(good)
+        sum_good_matches += num_matches
+
         if num_matches > max_matches:
             max_matches = num_matches
             best_i = i
             best_kp = kp2
+            max_good_matches = len(good)
             best_img = train_img
 
         print(f'{i+1} \t {training_set[i]} \t {len(good)}')
 
-    kp_perc = len(best_kp)/sum_kp*100
-    if max_matches >= MIN_MATCH_COUNT:
+    kp_perc = (max_good_matches/sum_good_matches*100) if sum_good_matches > 0 else 0
+    print(kp_perc)
+
+    if max_matches >= MIN_MATCH_COUNT or (kp_perc >= 50):
     # if kp_perc >= 20:
         print(f'\nMatch Found!\n{training_set_name[best_i]} has maximum matches of {max_matches} ({kp_perc}%)')
 

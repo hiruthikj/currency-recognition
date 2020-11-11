@@ -8,14 +8,14 @@ import glob
 import os
 from pathlib import Path
 
-MIN_MATCH_COUNT = 20
+MIN_MATCH_COUNT = 10
 KERNEL_SIZE = 9
 
 test_dir = 'testing_images'
 currency_dir = 'currency_images'
 # test_image_name = 'test_dollar_100.jpg'
 test_image_name = 'Euro-500.png'
-# test_image_name = 'test_100_1.jpg'
+# test_image_name = 'test_500_1.jpg'
 # test_image_name = 'Cat03.jpg'
 
 def main():
@@ -58,7 +58,7 @@ def main():
 
         # store all the good matches as per Lowe's ratio test.
         for m, n in all_matches:
-            if m.distance < 0.5 * n.distance:
+            if m.distance < 0.6 * n.distance:
                 good.append([m])
 
         sum_kp += len(kp2)

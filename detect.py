@@ -8,12 +8,13 @@ import glob
 import os
 from pathlib import Path
 
-MIN_MATCH_COUNT = 5
-KERNEL_SIZE = 7
+MIN_MATCH_COUNT = 20
+KERNEL_SIZE = 9
 
 test_dir = 'testing_images'
 currency_dir = 'currency_images'
-test_image_name = 'test_20_2.jpg'
+# test_image_name = 'test_dollar_100.jpg'
+test_image_name = 'Euro-500.png'
 # test_image_name = 'test_100_1.jpg'
 # test_image_name = 'Cat03.jpg'
 
@@ -57,7 +58,7 @@ def main():
 
         # store all the good matches as per Lowe's ratio test.
         for m, n in all_matches:
-            if m.distance < 0.7 * n.distance:
+            if m.distance < 0.5 * n.distance:
                 good.append([m])
 
         sum_kp += len(kp2)
@@ -72,8 +73,8 @@ def main():
         print(f'{i+1} \t {training_set[i]} \t {len(good)}')
 
     kp_perc = len(best_kp)/sum_kp*100
-    # if max_matches >= MIN_MATCH_COUNT:
-    if kp_perc > 10:
+    if max_matches >= MIN_MATCH_COUNT:
+    # if kp_perc >= 20:
         print(f'\nMatch Found!\n{training_set_name[best_i]} has maximum matches of {max_matches} ({kp_perc}%)')
 
         match_img = cv2.drawMatchesKnn(test_img, kp1, best_img, best_kp, good, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
@@ -102,15 +103,16 @@ def main():
 
 
 def preprocess(img, showImages = True):
-    #showing the image input    # img = cv2.equalizeHist(img.astype(np.uint8))
-    # showImages and display('After Histogram Equalization', img)ed
-    img = resize_img(img, 0.4)
+
+    showImages and display('before processing', img)
+    img = resize_img(img, 0.8)
     showImages and display('INPUT AFTER RESIZE', img)
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     showImages and display('After Converting to Grayscale', img)
 
     # img = cv2.equalizeHist(img.astype(np.uint8))
+    # img = hisEqulColor(img)
     # showImages and display('After Histogram Equalization', img)
 
     # test_img = cv2.GaussianBlur(img, (KERNEL_SIZE,KERNEL_SIZE), sigmaX=0)
@@ -119,6 +121,10 @@ def preprocess(img, showImages = True):
 
     ret2,img = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     showImages and display('OTSU threshol', img)
+
+    kernel = np.ones((3,3),np.uint8)
+    img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+    showImages and display('morph', img)
 
     # img = getAutoEdge(img)
     # showImages and display('After Canny Edge Detection', img)
@@ -142,18 +148,26 @@ def preprocess(img, showImages = True):
 
 
     # kernel = np.ones((5,5),np.uint8)
-    # erosion = cv2.erode(img,kernel,iterations = 1)
+    # erosion = cv2.dilate(img,kernel,iterations = 1)
     # showImages and display('erosion', img)
 
     return img
 
+# def hisEqulColor(img):
+#     ycrcb=cv2.cvtColor(img,cv2.COLOR_BGR2YCR_CB)
+#     channels=cv2.split(ycrcb)
+#     # print(len(channels))
+#     cv2.equalizeHist(channels[0],channels[0])
+#     cv2.merge(channels,ycrcb)
+#     cv2.cvtColor(ycrcb,cv2.COLOR_YCR_CB2BGR,img)
+#     return img
 
-def getAutoEdge(img, sigma=0.33):
-    v = np.median(img)
-    lower_thresh = int(max(0, (1.0 - sigma) * v))
-    upper_thresh = int(min(255, (1.0 + sigma) * v))
-    img_edges = cv2.Canny(img, lower_thresh, upper_thresh)
-    return img_edges
+# def getAutoEdge(img, sigma=0.33):
+#     v = np.median(img)
+#     lower_thresh = int(max(0, (1.0 - sigma) * v))
+#     upper_thresh = int(min(255, (1.0 + sigma) * v))
+#     img_edges = cv2.Canny(img, lower_thresh, upper_thresh)
+#     return img_edges
 
 
 if __name__ == '__main__':

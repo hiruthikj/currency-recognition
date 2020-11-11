@@ -3,7 +3,7 @@ __pycache__
 .env/
 .ipynb_checkpoints/
 audio/
-
+doc/
 
 # files
 try*

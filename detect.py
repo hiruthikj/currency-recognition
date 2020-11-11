@@ -13,9 +13,9 @@ KERNEL_SIZE = 11
 
 test_dir = 'testing_images'
 currency_dir = 'currency_images'
-# test_image_name = 'test_100_1.jpg'
-test_image_name = 'Euro-500.png'
-# test_image_name = 'test_100_1.jpg'
+# test_image_name = 'test_20_1.jpg'
+# test_image_name = 'Euro-500.png'
+test_image_name = 'test_dollar_1.jpg'
 # test_image_name = 'Cat03.jpg'
 
 def main():
@@ -110,12 +110,15 @@ def main():
 
 def preprocess(img, showImages = True):
 
-    showImages and display('before processing', img)
-    img = resize_img(img, 0.8)
-    showImages and display('INPUT AFTER RESIZE', img)
+    showImages and display('Before Processing', img)
+    
+    img = resize_img(img, 0.7)
+    showImages and display('After Resize', img)
+    # showImages and cv2.imwrite('1_after_resize.jpg',img)
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    showImages and display('After Converting to Grayscale', img)
+    showImages and display('After Grayscale', img)
+    # showImages and cv2.imwrite('2_after_grayscale.jpg',img)
 
     # img = cv2.equalizeHist(img.astype(np.uint8))
     # img = hisEqulColor(img)
@@ -124,13 +127,16 @@ def preprocess(img, showImages = True):
     # test_img = cv2.GaussianBlur(img, (KERNEL_SIZE,KERNEL_SIZE), sigmaX=0)
     img = cv2.bilateralFilter(img, KERNEL_SIZE, KERNEL_SIZE*2, KERNEL_SIZE//2)
     showImages and display('After Bilateral Blur', img)
+    # showImages and cv2.imwrite('3_after_blur.jpg',img)
 
     ret2,img = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    showImages and display('OTSU threshol', img)
+    showImages and display('After OTSU thresholding', img)
+    # showImages and cv2.imwrite('4_after_thresold.jpg',img)
 
     kernel = np.ones((3,3),np.uint8)
     img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
-    showImages and display('morph', img)
+    showImages and display('After Morphological Processing', img)
+    # showImages and cv2.imwrite('5_after_morph.jpg',img)
 
     # img = getAutoEdge(img)
     # showImages and display('After Canny Edge Detection', img)

@@ -1,26 +1,28 @@
 #!usr/bin/env python
-from utils import *
-from matplotlib import pyplot as plt
-import cv2
-import numpy as np
 
 import glob
 import os
 from pathlib import Path
 
-MIN_MATCH_COUNT = 7
+from matplotlib import pyplot as plt
+import numpy as np
+import cv2
+
+from utils import *
+
+MIN_MATCH_COUNT = 5
 KERNEL_SIZE = 11
 
 test_dir = 'testing_images'
 currency_dir = 'currency_images'
-# test_image_name = 'test_20_1.jpg'
+test_image_name = 'test_50_2.jpg'
 # test_image_name = 'Euro-500.png'
-test_image_name = 'test_dollar_1.jpg'
+# test_image_name = 'test_dollar_1.jpg'
 # test_image_name = 'Cat03.jpg'
 
 def main():
     print('Currency Recognition Program starting...\n')
-    print('ACTUAL denomination', test_image_name)
+    print('Actual Denomination', Path(test_image_name).stem)
 
     training_set = [
         img for img in glob.glob(os.path.join(currency_dir, "*.jpg"))
@@ -77,10 +79,8 @@ def main():
         print(f'{i+1} \t {training_set[i]} \t {len(good)}')
 
     kp_perc = (max_good_matches/sum_good_matches*100) if sum_good_matches > 0 else 0
-    print(kp_perc)
 
-    if max_matches >= MIN_MATCH_COUNT or (kp_perc >= 50):
-    # if kp_perc >= 20:
+    if max_matches >= MIN_MATCH_COUNT and (kp_perc >= 40):
         print(f'\nMatch Found!\n{training_set_name[best_i]} has maximum matches of {max_matches} ({kp_perc}%)')
 
         match_img = cv2.drawMatchesKnn(test_img, kp1, best_img, best_kp, good, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
@@ -109,9 +109,8 @@ def main():
 
 
 def preprocess(img, showImages = True):
-
     showImages and display('Before Processing', img)
-    
+
     img = resize_img(img, 0.7)
     showImages and display('After Resize', img)
     # showImages and cv2.imwrite('1_after_resize.jpg',img)
@@ -130,11 +129,11 @@ def preprocess(img, showImages = True):
     # showImages and cv2.imwrite('3_after_blur.jpg',img)
 
     ret2,img = cv2.threshold(img,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    showImages and display('After OTSU thresholding', img)
+    showImages and display('After Otsu thresholding', img)
     # showImages and cv2.imwrite('4_after_thresold.jpg',img)
 
     kernel = np.ones((3,3),np.uint8)
-    img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+    img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=2)
     showImages and display('After Morphological Processing', img)
     # showImages and cv2.imwrite('5_after_morph.jpg',img)
 
@@ -164,23 +163,6 @@ def preprocess(img, showImages = True):
     # showImages and display('erosion', img)
 
     return img
-
-# def hisEqulColor(img):
-#     ycrcb=cv2.cvtColor(img,cv2.COLOR_BGR2YCR_CB)
-#     channels=cv2.split(ycrcb)
-#     # print(len(channels))
-#     cv2.equalizeHist(channels[0],channels[0])
-#     cv2.merge(channels,ycrcb)
-#     cv2.cvtColor(ycrcb,cv2.COLOR_YCR_CB2BGR,img)
-#     return img
-
-# def getAutoEdge(img, sigma=0.33):
-#     v = np.median(img)
-#     lower_thresh = int(max(0, (1.0 - sigma) * v))
-#     upper_thresh = int(min(255, (1.0 + sigma) * v))
-#     img_edges = cv2.Canny(img, lower_thresh, upper_thresh)
-#     return img_edges
-
 
 if __name__ == '__main__':
     main()

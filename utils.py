@@ -28,3 +28,20 @@ def display(window_name, image):
 def resize_img(image, scale):
 	res = cv2.resize(image, None, fx=scale, fy=scale, interpolation = cv2.INTER_AREA)
 	return res
+
+def hisEqulColor(img):
+    ycrcb=cv2.cvtColor(img,cv2.COLOR_BGR2YCR_CB)
+    channels=cv2.split(ycrcb)
+    # print(len(channels))
+    cv2.equalizeHist(channels[0],channels[0])
+    cv2.merge(channels,ycrcb)
+    cv2.cvtColor(ycrcb,cv2.COLOR_YCR_CB2BGR,img)
+    return img
+
+def getAutoEdge(img, sigma=0.33):
+    v = np.median(img)
+    lower_thresh = int(max(0, (1.0 - sigma) * v))
+    upper_thresh = int(min(255, (1.0 + sigma) * v))
+    img_edges = cv2.Canny(img, lower_thresh, upper_thresh)
+    return img_edges
+
